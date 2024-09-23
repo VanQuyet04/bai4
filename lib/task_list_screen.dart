@@ -12,8 +12,9 @@ class TaskListScreen extends StatefulWidget {
 }
 
 class _TaskListScreenState extends State<TaskListScreen> {
+  // khởi tạo instance cho firebase
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  List<Task> tasks = [];
+  List<Task> tasks = []; // khởi tạo list task
 
   @override
   void initState() {

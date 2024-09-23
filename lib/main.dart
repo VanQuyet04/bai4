@@ -19,6 +19,7 @@ class MyApp extends StatelessWidget {
       title: 'Task List App',
       theme: ThemeData(primarySwatch: Colors.blue),
       home: const TaskListScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -42,7 +43,7 @@ Future<void> showNotification(String title) async {
   const AndroidNotificationDetails androidPlatformChannelSpecifics =
   AndroidNotificationDetails(
       'your_channel_id', 'your_channel_name',
-      importance: Importance.max, priority: Priority.high, showWhen: false);
+      importance: Importance.max, priority: Priority.high, showWhen: true);
   const NotificationDetails platformChannelSpecifics =
   NotificationDetails(android: androidPlatformChannelSpecifics);
 
