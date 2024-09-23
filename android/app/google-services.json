@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "450653533727",
+    "project_id": "bai4-fluter",
+    "storage_bucket": "bai4-fluter.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:450653533727:android:3e82b82c6848973144472a",
+        "android_client_info": {
+          "package_name": "com.example.bai4"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHFHV1dbNmZ5Gy8mjETjqDUTiOQQY_0Y0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
