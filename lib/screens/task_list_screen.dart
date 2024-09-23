@@ -1,8 +1,9 @@
+import 'package:bai4/utils/utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // Import thư viện intl
-import 'task.dart';
-import 'main.dart';
+import '../models/task.dart';
+import '../main.dart';
 
 class TaskListScreen extends StatefulWidget {
   const TaskListScreen({super.key});
@@ -22,43 +23,51 @@ class _TaskListScreenState extends State<TaskListScreen> {
     loadTasks();
   }
 
+  // logic các hàm crud
+
+  // hàm lấy danh sách dạng map sau đó chuyển đổi sang list task
   Future<void> loadTasks() async {
     final snapshot = await _firestore.collection('tasks').get();
     setState(() {
-      tasks = snapshot.docs
-          .map((doc) => Task.fromMap(doc.data(), doc.id))
-          .toList();
+      tasks =
+          snapshot.docs.map((doc) => Task.fromMap(doc.data(), doc.id)).toList();
     });
   }
 
+  // tạo mới task
   Future<void> createTask(Task task) async {
     await _firestore.collection('tasks').add(task.toMap());
     loadTasks();
   }
 
+  // cập nhật task
   Future<void> updateTask(Task task) async {
     await _firestore.collection('tasks').doc(task.id).update(task.toMap());
     loadTasks();
   }
 
+  //xóa task
   Future<void> deleteTask(String id) async {
     await _firestore.collection('tasks').doc(id).delete();
     loadTasks();
   }
 
+
+  // kiểm tra deadline task để thông báo
   void checkDeadlines() {
     final now = DateTime.now();
     for (var task in tasks) {
-      if (task.deadline.isBefore(now) && task.isCompleted==false) {
+      if (task.deadline.isBefore(now) && task.isCompleted == false) {
         // Gửi thông báo nếu deadline đã đến
         showNotification(task.title);
-        task.isCompleted = true; // Hoặc một cách khác để không thông báo lần nữa
+        task.isCompleted =
+            true; // cập nhật trạng thái đã hoàn thành để k tbao nữa
         updateTask(task); // Cập nhật task vào Firestore
       }
     }
   }
 
-  void createNewTask() {
+  void addTask() {
     TextEditingController titleController = TextEditingController();
     DateTime? selectedDateTime;
 
@@ -72,7 +81,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
             children: [
               TextField(
                 controller: titleController,
-                decoration: const InputDecoration(hintText: 'Nhập tiêu đề công việc'),
+                decoration:
+                    const InputDecoration(hintText: 'Nhập tiêu đề công việc'),
               ),
               const SizedBox(height: 20),
               TextButton(
@@ -83,6 +93,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                     firstDate: DateTime(2000),
                     lastDate: DateTime(2101),
                   );
+
                   if (picked != null) {
                     TimeOfDay? timePicked = await showTimePicker(
                       context: context,
@@ -102,7 +113,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
                 child: const Text('Chọn thời gian'),
               ),
               if (selectedDateTime != null)
-                Text('Deadline: ${DateFormat('HH:mm').format(selectedDateTime!)}'), // Chỉ hiển thị giờ và phút
+                Text(
+                    'Deadline: ${DateFormat('HH:mm').format(selectedDateTime!)}'), // Chỉ hiển thị giờ và phút
             ],
           ),
           actions: [
@@ -114,7 +126,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
             ),
             TextButton(
               onPressed: () {
-                if (titleController.text.isNotEmpty && selectedDateTime != null) {
+                if (titleController.text.isNotEmpty &&
+                    selectedDateTime != null) {
                   createTask(Task(
                     id: '',
                     title: titleController.text,
@@ -122,10 +135,10 @@ class _TaskListScreenState extends State<TaskListScreen> {
                     deadline: selectedDateTime!,
                   ));
                   Navigator.of(context).pop();
+                  showCustomSnackBar(
+                      context, 'Thêm task thành công!', Colors.green);
                 } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Vui lòng chọn deadline!')),
-                  );
+                  showCustomSnackBar(context, 'Vui lòng chọn deadline!', Colors.red);
                 }
               },
               child: const Text('Lưu'),
@@ -137,7 +150,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
   }
 
   void editTask(Task task) {
-    TextEditingController titleController = TextEditingController(text: task.title);
+    TextEditingController titleController =
+        TextEditingController(text: task.title);
     DateTime? selectedDateTime = task.deadline;
 
     showDialog(
@@ -150,7 +164,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
             children: [
               TextField(
                 controller: titleController,
-                decoration: const InputDecoration(hintText: 'Nhập tiêu đề công việc'),
+                decoration:
+                    const InputDecoration(hintText: 'Nhập tiêu đề công việc'),
               ),
               const SizedBox(height: 20),
               TextButton(
@@ -164,7 +179,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
                   if (picked != null) {
                     TimeOfDay? timePicked = await showTimePicker(
                       context: context,
-                      initialTime: TimeOfDay.fromDateTime(selectedDateTime ?? DateTime.now()),
+                      initialTime: TimeOfDay.fromDateTime(
+                          selectedDateTime ?? DateTime.now()),
                     );
                     if (timePicked != null) {
                       selectedDateTime = DateTime(
@@ -180,7 +196,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
                 child: const Text('Chọn thời gian'),
               ),
               if (selectedDateTime != null)
-                Text('Deadline: ${DateFormat('HH:mm').format(selectedDateTime!)}'), // Chỉ hiển thị giờ và phút
+                Text(
+                    'Deadline: ${DateFormat('HH:mm').format(selectedDateTime!)}'), // Chỉ hiển thị giờ và phút
             ],
           ),
           actions: [
@@ -192,15 +209,16 @@ class _TaskListScreenState extends State<TaskListScreen> {
             ),
             TextButton(
               onPressed: () {
-                if (titleController.text.isNotEmpty && selectedDateTime != null) {
+                if (titleController.text.isNotEmpty &&
+                    selectedDateTime != null) {
                   task.title = titleController.text;
                   task.deadline = selectedDateTime!;
                   updateTask(task);
                   Navigator.of(context).pop();
+                  showCustomSnackBar(
+                      context, 'Cập nhật thành công task', Colors.green);
                 } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Vui lòng chọn deadline!')),
-                  );
+                  showCustomSnackBar(context, 'Vui lòng chọn deadline!', Colors.red);
                 }
               },
               child: const Text('Lưu'),
@@ -209,6 +227,36 @@ class _TaskListScreenState extends State<TaskListScreen> {
         );
       },
     );
+  }
+
+  void removeTask(String id) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Xác nhận xóa'),
+            content: const Text('Bạn có chắc chắn muốn xóa task không?'),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('Cancel'),
+                onPressed: () {
+                  Navigator.of(context)
+                      .pop(false); // Trả về false khi nhấn Cancel
+                },
+              ),
+              TextButton(
+                child: const Text('Yes'),
+                onPressed: () {
+                  deleteTask(id);
+                  Navigator.of(context).pop(false);
+                  showCustomSnackBar(
+                      context, 'Đã xóa thành công task', Colors.green);
+                  loadTasks();
+                },
+              ),
+            ],
+          );
+        });
   }
 
   @override
@@ -222,7 +270,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
           final task = tasks[index];
           return ListTile(
             title: Text(task.title),
-            subtitle: Text('Deadline: ${DateFormat('HH:mm').format(task.deadline)}'), // Chỉ hiển thị giờ và phút
+            subtitle:
+                Text('Deadline: ${DateFormat('HH:mm').format(task.deadline)}'),
+            // Chỉ hiển thị giờ và phút
             trailing: Checkbox(
               value: task.isCompleted,
               onChanged: (bool? value) {
@@ -231,12 +281,12 @@ class _TaskListScreenState extends State<TaskListScreen> {
               },
             ),
             onTap: () => editTask(task),
-            onLongPress: () => deleteTask(task.id),
+            onLongPress: () => removeTask(task.id),
           );
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => createNewTask(),
+        onPressed: () => addTask(),
         child: const Icon(Icons.add),
       ),
     );
